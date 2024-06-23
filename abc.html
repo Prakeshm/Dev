@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zip File Extractor</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.6.0/jszip.min.js"></script>
+</head>
+<body>
+    <h2>Zip File Extractor</h2>
+
+    <form id="zipForm" enctype="multipart/form-data">
+        <input type="file" id="zipFile" name="zipFile" accept=".zip">
+        <button type="submit">Extract</button>
+    </form>
+
+    <div id="output"></div>
+
+    <script>
+        document.getElementById('zipForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const zipFile = formData.get('zipFile');
+
+            if (!zipFile) {
+                alert('Please select a zip file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const zip = new JSZip();
+                zip.loadAsync(e.target.result)
+                    .then(function(contents) {
+                        let output = '<p>Files extracted:</p><ul>';
+                        contents.forEach(function (relativePath, file) {
+                            output += `<li>${file.name}</li>`;
+                        });
+                        output += '</ul>';
+                        document.getElementById('output').innerHTML = output;
+                    })
+                    .catch(function(error) {
+                        console.error('Error reading zip file:', error);
+                        document.getElementById('output').innerHTML = '<p>Error reading zip file.</p>';
+                    });
+            };
+
+            reader.readAsArrayBuffer(zipFile);
+        });
+    </script>
+</body>
+</html>
